@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+chromadb==0.4.24
+sentence-transformers
+pydantic-settings
+python-dotenv
+pymupdf
+python-docx
+openai>=1.40.0
