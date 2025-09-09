@@ -14,6 +14,8 @@ Windws
 ```bash
 python -m venv .venv
 .venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env
 ```
 ## 2. LLM 側（LM Studio）
 - LM Studio を起動し **Phi-3-mini** をロード
