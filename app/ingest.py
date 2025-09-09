@@ -13,20 +13,36 @@ from .parsers import load_text_from_file, SUPPORTED_EXTS
 from .vectorstore import get_collection
 
 def chunk_text(text: str, max_chars: int, overlap: int) -> List[str]:
-    """文字数ベースの素朴なチャンク。重なりを付けて文脈を保つ。"""
-    chunks = []
-    start = 0
+    """
+    文字数ベースの安全なチャンク分割。
+    - 短文（n <= max_chars）は一発で返す
+    - ステップ = max_chars - overlap（ただし最低1）
+    - 末尾に到達したら必ず終了（無限ループ防止）
+    """
     n = len(text)
+    if n == 0:
+        return []
+    if max_chars <= 0:
+        raise ValueError("max_chars must be > 0")
+
+    # 短文ならそのまま返す
+    if n <= max_chars:
+        return [text]
+
+    # overlap は 0〜max_chars-1 にクランプ
+    overlap = max(0, min(overlap, max_chars - 1))
+    step = max(1, max_chars - overlap)
+
+    chunks: List[str] = []
+    start = 0
     while start < n:
         end = min(start + max_chars, n)
         chunk = text[start:end]
-        chunks.append(chunk)
-        # 次の開始位置は「end - overlap」
-        start = end - overlap
-        if start < 0:
-            start = 0
-        if start >= n:
-            break
+        if chunk:  # 念のため空文字は除外
+            chunks.append(chunk)
+        if end >= n:
+            break  # 末尾に到達したので終了
+        start += step  # 次の開始位置（必ず前進する）
     return chunks
 
 def _delete_by_path(path: str):
