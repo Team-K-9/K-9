@@ -4,6 +4,10 @@
 最小限の API で「取り込み → 検索 → RAG回答 → プレビュー」の一連を実演できます。
 
 ## 1. セットアップ
+リポジトリをクローン
+```bash
+git clone https://github.com/Team-K-9/K-9.git
+```
 Mac
 ```bash
 python -m venv .venv && source .venv/bin/activate
