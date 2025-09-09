@@ -34,7 +34,7 @@ cp .env.example .env
 uvicorn app.main:app --reload
 ```
 サイトにアクセス
-```bash
+```http
 http://127.0.0.1:8000/docs#/
 ```
 
@@ -78,4 +78,5 @@ curl 'localhost:8000/stats'
 ## 6. 注意
 - デモ用の単純実装です。ファイル更新検知や重複排除は必要最低限です。
 - 検索の rerank、SSE ストリーミング、認証等は省略しています（必要なら拡張してください）。
+
 
