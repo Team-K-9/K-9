@@ -71,23 +71,25 @@ def search(q: str, k: int = 5):
 
 @app.post("/chat", response_model=ChatResponse)
 def chat(req: ChatRequest):
-    """RAG チャット。検索上位チャンクを文脈に回答を生成。"""
     col = get_collection()
     res = col.query(query_texts=[req.query], n_results=req.top_k)
     docs = res.get("documents", [[]])[0]
     metas = res.get("metadatas", [[]])[0]
 
-    answer = rag_answer(req.query, docs)
+    try:
+        answer = rag_answer(req.query, docs)
+    except Exception as e:
+        # ここで 500 にせず詳細をクライアントへ返す
+        raise HTTPException(status_code=502, detail=str(e))
 
     citations: List[SearchResult] = []
     for doc, meta in zip(docs, metas):
         citations.append(SearchResult(
             path=meta.get("path", ""),
-            score=0.0,  # デモではスコア省略
+            score=0.0,
             snippet=doc[:200].replace("\n", " "),
             mtime=float(meta.get("mtime", 0.0)),
         ))
-
     return ChatResponse(answer=answer, citations=citations)
 
 @app.get("/preview")
