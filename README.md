@@ -12,6 +12,7 @@ cp .env.example .env
 ```
 Windws
 ```bash
+cd K-9
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
