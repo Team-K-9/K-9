@@ -4,13 +4,17 @@
 最小限の API で「取り込み → 検索 → RAG回答 → プレビュー」の一連を実演できます。
 
 ## 1. セットアップ
-
+Mac
 ```bash
-python -m venv .venv && source .venv/bin/activate  # Windows は .venv\Scripts\activate
+python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
 ```
-
+Windws
+```bash
+python -m venv .venv
+.venv\Scripts\activate
+```
 ## 2. LLM 側（LM Studio）
 - LM Studio を起動し **Phi-3-mini** をロード
 - OpenAI 互換 API を **ON**（例: `http://localhost:1234/v1`）
