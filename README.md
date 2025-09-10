@@ -40,13 +40,14 @@ uvicorn app.main:app --reload
 <img width="1234" height="936" alt="{71509029-2B2C-4E72-B235-C4A73935D411}" src="https://github.com/user-attachments/assets/ad391f74-0b23-45b4-9fea-e96aec6d050f" />
 Path内の"読み込みたいフォルダ名"(デフォルトではstring)の部分に読み込ませたいフォルダのmain.pyの相対パスを入力<br>
 Executeを押して実行<br>
+<br>
 
-  
 3) 検索
 <img width="1224" height="625" alt="{C8307747-A224-4904-9769-00146F864015}" src="https://github.com/user-attachments/assets/8ed46ba4-1d93-4d70-a973-e2f9b61a0999" />
 qのボックスには検索に使いたいキーワード<br>
 kのボックスには検索結果で最も近かったファイルの上位何個を表示するかの設定<br>
 Executeで検索
+<br>
 
 
 3)RAG チャット
@@ -91,6 +92,7 @@ curl 'localhost:8000/stats'
 ## 6. 注意
 - デモ用の単純実装です。ファイル更新検知や重複排除は必要最低限です。
 - 検索の rerank、SSE ストリーミング、認証等は省略しています（必要なら拡張してください）。
+
 
 
 
