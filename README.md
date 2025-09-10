@@ -34,8 +34,11 @@ cp .env.example .env
 uvicorn app.main:app --reload
 ```
 [サイトにアクセス](http://127.0.0.1:8000/docs#/)
+## 4.デモ用の流れ(GUI)
+1)取り込み
+<img width="1234" height="936" alt="{71509029-2B2C-4E72-B235-C4A73935D411}" src="https://github.com/user-attachments/assets/ad391f74-0b23-45b4-9fea-e96aec6d050f" />
 
-## 4. デモ用の流れ
+## 4. デモ用の流れ(コマンドライン)
 
 1) 取り込み（初回のみ）  
 ```bash
@@ -75,6 +78,7 @@ curl 'localhost:8000/stats'
 ## 6. 注意
 - デモ用の単純実装です。ファイル更新検知や重複排除は必要最低限です。
 - 検索の rerank、SSE ストリーミング、認証等は省略しています（必要なら拡張してください）。
+
 
 
 
