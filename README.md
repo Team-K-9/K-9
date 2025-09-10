@@ -37,7 +37,7 @@ uvicorn app.main:app --reload
 
 ## 4.デモ用の流れ(GUI)
 1) 取り込み
-<img width="1234" height="936" alt="{71509029-2B2C-4E72-B235-C4A73935D411}" src="https://github.com/user-attachments/assets/ad391f74-0b23-45b4-9fea-e96aec6d050f" />
+<img width="600" height="400" alt="{71509029-2B2C-4E72-B235-C4A73935D411}" src="https://github.com/user-attachments/assets/ad391f74-0b23-45b4-9fea-e96aec6d050f" />
 Path内の"読み込みたいフォルダ名"(デフォルトではstring)の部分に読み込ませたいフォルダのmain.pyの相対パスを入力<br>
 Executeを押して実行<br>
 <br>
@@ -91,6 +91,7 @@ curl 'localhost:8000/stats'
 ## 6. 注意
 - デモ用の単純実装です。ファイル更新検知や重複排除は必要最低限です。
 - 検索の rerank、SSE ストリーミング、認証等は省略しています（必要なら拡張してください）。
+
 
 
 
