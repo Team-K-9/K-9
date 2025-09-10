@@ -46,9 +46,8 @@ Executeを押して実行<br>
 <img width="1224" height="625" alt="{C8307747-A224-4904-9769-00146F864015}" src="https://github.com/user-attachments/assets/8ed46ba4-1d93-4d70-a973-e2f9b61a0999" />
 qのボックスには検索に使いたいキーワード<br>
 kのボックスには検索結果で最も近かったファイルの上位何個を表示するかの設定<br>
-Executeで検索
+Executeで検索<br>
 <br>
-
 
 3)RAG チャット
 現在利用不可
@@ -92,6 +91,7 @@ curl 'localhost:8000/stats'
 ## 6. 注意
 - デモ用の単純実装です。ファイル更新検知や重複排除は必要最低限です。
 - 検索の rerank、SSE ストリーミング、認証等は省略しています（必要なら拡張してください）。
+
 
 
 
