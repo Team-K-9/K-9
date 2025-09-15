@@ -5,22 +5,19 @@
 # Chroma に差し込める「embedding_function」も用意します。
 # =============================================
 from sentence_transformers import SentenceTransformer
-from typing import List
+from chromadb.utils.embedding_functions import EmbeddingFunction
 
 class Embedder:
-    """Sentence-Transformers の薄いラッパ。
-    - 正規化付きでベクトルを返します（検索の安定化のため）。
-    """
     def __init__(self, model_name: str):
         self.model = SentenceTransformer(model_name)
 
-    def embed(self, texts: List[str]) -> List[List[float]]:
-        return self.model.encode(texts, normalize_embeddings=True).tolist()
+    def encode(self, texts: list[str]):
+        return self.model.encode(texts, convert_to_numpy=True).tolist()
 
-class ChromaEmbeddingFunction:
-    """Chroma に渡すための関数型ラッパ。"""
+class ChromaEmbeddingFunction(EmbeddingFunction):
     def __init__(self, embedder: Embedder):
         self._embedder = embedder
 
-    def __call__(self, texts: List[str]) -> List[List[float]]:
-        return self._embedder.embed(texts)
+    def __call__(self, input: list[str]):
+        # ChromaDB が要求する形式 (input 引数) に対応
+        return self._embedder.encode(input)
