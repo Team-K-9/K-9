@@ -13,6 +13,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 
+
 from .config import settings
 from .schemas import (
     IngestRequest, IngestResponse,
@@ -24,6 +25,9 @@ from .vectorstore import get_collection
 from .ingest import ingest_paths
 from .parsers import load_text_from_file
 from .llm import rag_answer
+
+import json
+from fastapi.responses import JSONResponse #追加
 
 app = FastAPI(title="K-nine Demo Backend", version="0.2.0")
 
@@ -69,7 +73,8 @@ def search(q: str, k: int = 5):
 
     return SearchResponse(query=q, results=results)
 
-@app.post("/chat", response_model=ChatResponse)
+
+@app.post("/chat")
 def chat(req: ChatRequest):
     """RAG チャット。検索上位チャンクを文脈に回答を生成。"""
     col = get_collection()
@@ -83,12 +88,16 @@ def chat(req: ChatRequest):
     for doc, meta in zip(docs, metas):
         citations.append(SearchResult(
             path=meta.get("path", ""),
-            score=0.0,  # デモではスコア省略
+            score=0.0,
             snippet=doc[:200].replace("\n", " "),
             mtime=float(meta.get("mtime", 0.0)),
         ))
 
-    return ChatResponse(answer=answer, citations=citations)
+    result = ChatResponse(answer=answer, citations=citations).model_dump()
+
+    # 文字化け防止：UTF-8 明示
+    return JSONResponse(content=result, media_type="application/json; charset=utf-8")
+
 
 @app.get("/preview")
 def preview(path: str, nchars: int = 800):
