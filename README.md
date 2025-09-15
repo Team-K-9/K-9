@@ -23,7 +23,7 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 ## 2. LLM 側（LM Studio）
-- LM Studio を起動し **Phi-3-mini** をロード
+- LM Studio を起動し **google/gemma-3-12b** をロード
 - OpenAI 互換 API を **ON**（例: `http://localhost:1234/v1`）
 
 `.env` の `LLM_BASE_URL`, `LLM_MODEL` を必要に応じて合わせてください。
@@ -84,13 +84,14 @@ curl 'localhost:8000/stats'
 - `app/ingest.py` … チャンク化 → 埋め込み → ChromaDB 追加
 - `app/vectorstore.py` … Chroma クライアントとコレクション管理
 - `app/embeddings.py` … Sentence-Transformers のラッパ
-- `app/llm.py` … Phi-3-mini への問い合わせ（LM Studio 経由）
+- `app/llm.py` … google/gemma-3-12b への問い合わせ（LM Studio 経由）
 - `app/schemas.py` … FastAPI の入出力スキーマ
 - `app/main.py` … ルーター（/health /ingest /search /chat /preview /stats）
 
 ## 6. 注意
 - デモ用の単純実装です。ファイル更新検知や重複排除は必要最低限です。
 - 検索の rerank、SSE ストリーミング、認証等は省略しています（必要なら拡張してください）。
+
 
 
 
