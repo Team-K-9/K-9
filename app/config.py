@@ -10,8 +10,8 @@ from pydantic import Field
 
 class Settings(BaseSettings):
     # パス類
-    data_root: str = Field(default="./demo_docs", alias="DATA_ROOT")
-    chroma_dir: str = Field(default="./.chroma", alias="CHROMA_DIR")
+    data_root: str = Field(default="K-9\demo_docs", alias="DATA_ROOT")
+    chroma_dir: str = Field(default=".\.chroma", alias="CHROMA_DIR")
     collection_name: str = Field(default="k9_demo", alias="COLLECTION_NAME")
 
     # チャンク化
