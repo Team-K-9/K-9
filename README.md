@@ -31,7 +31,7 @@ cp .env.example .env
 ## 3. サーバ起動
 
 ```bash
-uvicorn app.main:app --reload
+uvicorn app.main:app --reload --log-level debug --access-log
 ```
 
 ## 4. デモ用の流れ
