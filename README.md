@@ -1,4 +1,4 @@
-# K-nine デモ盤バックエンド（FastAPI + Chroma + Phi-3-mini）
+# K-nine デモ盤バックエンド（FastAPI + Chroma + llama-2-7b-chat）
 
 このリポジトリは、**AIPC向け対話型ファイルエクスプローラ with RAG** のデモ用バックエンドです。  
 最小限の API で「取り込み → 検索 → RAG回答 → プレビュー」の一連を実演できます。
@@ -23,7 +23,7 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 ## 2. LLM 側（LM Studio）
-- LM Studio を起動し **Phi-3-mini** をロード
+- LM Studio を起動し **llama-2-7b-chat** をロード
 - OpenAI 互換 API を **ON**（例: `http://localhost:1234/v1`）
 
 `.env` の `LLM_BASE_URL`, `LLM_MODEL` を必要に応じて合わせてください。
@@ -91,6 +91,7 @@ curl 'localhost:8000/stats'
 ## 6. 注意
 - デモ用の単純実装です。ファイル更新検知や重複排除は必要最低限です。
 - 検索の rerank、SSE ストリーミング、認証等は省略しています（必要なら拡張してください）。
+
 
 
 
