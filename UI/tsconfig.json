@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "outDir": "./",
+    "strict": true,
+    "lib": [
+      "dom",
+      "es2015"
+    ],
+    "types": []
+  },
+  "files": [
+    "./main.ts"
+  ]
+}

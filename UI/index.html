@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K-9</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <header>
+            <h1>K-9</h1>
+            <p>チャットでファイル操作</p>
+        </header>
+
+        <div class="chat-container">
+            <div class="chat-log" id="chat-log">
+                <div class="chat-message bot-message">
+                    <p>こんにちは！K-9です。ファイルの検索、閲覧、整理などお手伝いします。どのようにお手伝いしましょうか？</p>
+                    <div class="quick-actions">
+                        <button class="action-button">ファイルを検索</button>
+                        <button class="action-button">フォルダを作成</button>
+                        <button class="action-button">最近のファイルを表示</button>
+                        <button class="action-button">ヘルプを表示</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <textarea id="query-input" placeholder="ファイルを検索、操作、質問..."></textarea>
+        <button id="send-button" aria-label="送信">
+    <svg id="send-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"></line>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+    </svg>
+    <svg id="loading-spinner" class="spinner hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+    </svg>
+</button>
+        </div>
+    </div>
+    <script src="main.js"></script>
+</body>
+
+</html>
