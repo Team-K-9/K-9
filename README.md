@@ -1,8 +1,6 @@
-<<<<<<< HEAD
+
 # K-nine デモ盤バックエンド（FastAPI + Chroma + llama-2-7b-chat）
-=======
-# K-nine デモ盤バックエンド（FastAPI + Chroma + Phi-3-mini）
->>>>>>> cdb390450c32cc0bc1e040247ea9d902ff7e8c0b
+
 
 このリポジトリは、**AIPC向け対話型ファイルエクスプローラ with RAG** のデモ用バックエンドです。  
 最小限の API で「取り込み → 検索 → RAG回答 → プレビュー」の一連を実演できます。
@@ -104,6 +102,7 @@ curl 'localhost:8000/stats'
 - デモ用の単純実装です。ファイル更新検知や重複排除は必要最低限です。
 <<<<<<< HEAD
 - 検索の rerank、SSE ストリーミング、認証等は省略しています（必要なら拡張してください）。
+
 
 
 
