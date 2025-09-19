@@ -13,7 +13,10 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> cdb390450c32cc0bc1e040247ea9d902ff7e8c0b
 from .config import settings
 from .schemas import (
     IngestRequest, IngestResponse,
@@ -26,9 +29,12 @@ from .ingest import ingest_paths
 from .parsers import load_text_from_file
 from .llm import rag_answer
 
+<<<<<<< HEAD
 import json
 from fastapi.responses import JSONResponse #追加
 
+=======
+>>>>>>> cdb390450c32cc0bc1e040247ea9d902ff7e8c0b
 app = FastAPI(title="K-nine Demo Backend", version="0.2.0")
 
 # 開発しやすいよう、CORS は広めに許可（必要なら絞ってください）
@@ -73,8 +79,12 @@ def search(q: str, k: int = 5):
 
     return SearchResponse(query=q, results=results)
 
+<<<<<<< HEAD
 
 @app.post("/chat")
+=======
+@app.post("/chat", response_model=ChatResponse)
+>>>>>>> cdb390450c32cc0bc1e040247ea9d902ff7e8c0b
 def chat(req: ChatRequest):
     """RAG チャット。検索上位チャンクを文脈に回答を生成。"""
     col = get_collection()
@@ -88,16 +98,24 @@ def chat(req: ChatRequest):
     for doc, meta in zip(docs, metas):
         citations.append(SearchResult(
             path=meta.get("path", ""),
+<<<<<<< HEAD
             score=0.0,
+=======
+            score=0.0,  # デモではスコア省略
+>>>>>>> cdb390450c32cc0bc1e040247ea9d902ff7e8c0b
             snippet=doc[:200].replace("\n", " "),
             mtime=float(meta.get("mtime", 0.0)),
         ))
 
+<<<<<<< HEAD
     result = ChatResponse(answer=answer, citations=citations).model_dump()
 
     # 文字化け防止：UTF-8 明示
     return JSONResponse(content=result, media_type="application/json; charset=utf-8")
 
+=======
+    return ChatResponse(answer=answer, citations=citations)
+>>>>>>> cdb390450c32cc0bc1e040247ea9d902ff7e8c0b
 
 @app.get("/preview")
 def preview(path: str, nchars: int = 800):

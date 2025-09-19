@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # K-nine デモ盤バックエンド（FastAPI + Chroma + llama-2-7b-chat）
+=======
+# K-nine デモ盤バックエンド（FastAPI + Chroma + Phi-3-mini）
+>>>>>>> cdb390450c32cc0bc1e040247ea9d902ff7e8c0b
 
 このリポジトリは、**AIPC向け対話型ファイルエクスプローラ with RAG** のデモ用バックエンドです。  
 最小限の API で「取り込み → 検索 → RAG回答 → プレビュー」の一連を実演できます。
@@ -23,7 +27,11 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 ## 2. LLM 側（LM Studio）
+<<<<<<< HEAD
 - LM Studio を起動し **llama-2-7b-chat** をロード
+=======
+- LM Studio を起動し **Phi-3-mini** をロード
+>>>>>>> cdb390450c32cc0bc1e040247ea9d902ff7e8c0b
 - OpenAI 互換 API を **ON**（例: `http://localhost:1234/v1`）
 
 `.env` の `LLM_BASE_URL`, `LLM_MODEL` を必要に応じて合わせてください。
@@ -31,7 +39,11 @@ cp .env.example .env
 ## 3. サーバ起動
 
 ```bash
+<<<<<<< HEAD
 uvicorn app.main:app --reload
+=======
+uvicorn app.main:app --reload --log-level debug --access-log
+>>>>>>> cdb390450c32cc0bc1e040247ea9d902ff7e8c0b
 ```
 [サイトにアクセス](http://127.0.0.1:8000/docs#/)
 
@@ -90,6 +102,7 @@ curl 'localhost:8000/stats'
 
 ## 6. 注意
 - デモ用の単純実装です。ファイル更新検知や重複排除は必要最低限です。
+<<<<<<< HEAD
 - 検索の rerank、SSE ストリーミング、認証等は省略しています（必要なら拡張してください）。
 
 
@@ -113,3 +126,6 @@ curl 'localhost:8000/stats'
 
 
 
+=======
+- 検索の rerank、SSE ストリーミング、認証等は省略しています（必要なら拡張してください）。
+>>>>>>> cdb390450c32cc0bc1e040247ea9d902ff7e8c0b

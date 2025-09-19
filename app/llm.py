@@ -1,13 +1,26 @@
+<<<<<<< HEAD
 
 
+=======
+# =============================================
+# llm.py
+# ---------------------------------------------
+# LM Studio の OpenAI 互換 API を使って Phi-3-mini を呼び出す。
+# RAG 用に、検索で得たチャンクを「参考文脈」として渡します。
+# =============================================
+>>>>>>> cdb390450c32cc0bc1e040247ea9d902ff7e8c0b
 from typing import List
 from openai import OpenAI
 from .config import settings
 
 # RAG の基本姿勢をガイドするシステムプロンプト
 _SYSTEM_PROMPT = (
+<<<<<<< HEAD
     "あなたはRAGアシスタントです。与えられた文脈だけを根拠に、簡潔で正確に答えてください。"
     "わからない場合は推測せず『手元の文書からは断定できません』と答えてください。"
+=======
+    "あなたはRAGアシスタントです。与えられた文脈だけを根拠に、簡潔で正確に答えてください。"    "わからない場合は推測せず『手元の文書からは断定できません』と答えてください。"
+>>>>>>> cdb390450c32cc0bc1e040247ea9d902ff7e8c0b
 )
 
 # OpenAI 互換クライアント（base_url を LM Studio に向ける）
@@ -22,7 +35,10 @@ def rag_answer(query: str, contexts: List[str]) -> str:
         "日本語で、要点を簡潔にまとめて回答してください。根拠の箇所があれば短く触れてください。"
     )
 
+<<<<<<< HEAD
     # 🔹 ここで LM Studio にリクエスト
+=======
+>>>>>>> cdb390450c32cc0bc1e040247ea9d902ff7e8c0b
     resp = _client.chat.completions.create(
         model=settings.llm_model,
         messages=[
@@ -32,6 +48,7 @@ def rag_answer(query: str, contexts: List[str]) -> str:
         temperature=0.2,
         max_tokens=512,
     )
+<<<<<<< HEAD
 
     raw_answer = resp.choices[0].message.content
 
@@ -53,3 +70,6 @@ def rag_answer(query: str, contexts: List[str]) -> str:
             print("Decode error:", e)
 
     return str(raw_answer).strip()
+=======
+    return resp.choices[0].message.content.strip()
+>>>>>>> cdb390450c32cc0bc1e040247ea9d902ff7e8c0b

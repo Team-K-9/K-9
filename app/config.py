@@ -24,7 +24,11 @@ class Settings(BaseSettings):
     # LLM（OpenAI 互換）
     llm_base_url: str = Field(default="http://localhost:1234/v1", alias="LLM_BASE_URL")
     llm_api_key: str = Field(default="lm-studio", alias="LLM_API_KEY")
+<<<<<<< HEAD
     llm_model: str = Field(default="llama-2-7b-chat", alias="LLM_MODEL")
+=======
+    llm_model: str = Field(default="phi3:mini", alias="LLM_MODEL")
+>>>>>>> cdb390450c32cc0bc1e040247ea9d902ff7e8c0b
 
     class Config:
         env_file = ".env"
