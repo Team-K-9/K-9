@@ -212,7 +212,7 @@ def list_files(
         files.append({
             "path": p,
             "mtime": mtime,
-            "mtime_str": mtime_str,  # ←ここ
+            "mtime_str": mtime_str,  # ←追加
             "size": size
         })
 
@@ -263,3 +263,4 @@ def debug():
     col = get_collection()
     data = col.get(include=["metadatas"])
     return {"metas": data.get("metadatas", [])[:5]}
+
