@@ -74,17 +74,20 @@ def _ingest_file(col, path: str) -> Tuple[int, int]:
     chunks = chunk_text(text, settings.max_chars_per_chunk, settings.chunk_overlap_chars)
     mtime = os.path.getmtime(path)
     digest = file_hash(path)
+    size = os.path.getsize(path)   # ★ ファイルサイズを取得
 
     ids = [f"{digest}:{i}" for i in range(len(chunks))]
     metadatas = [{
         "path": path,
         "mtime": mtime,
+        "size": size,         # ★ ここ追加
         "chunk_index": i,
         "digest": digest,
     } for i in range(len(chunks))]
 
     col.add(ids=ids, documents=chunks, metadatas=metadatas)
     return 1, len(chunks)
+
 
 def ingest_paths(paths: List[str]) -> Tuple[int, int, int]:
     """複数パス（ファイル/ディレクトリ）を取り込み。統計を返す。"""
