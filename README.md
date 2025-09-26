@@ -23,7 +23,7 @@ python -m venv .venv
 pip install -r requirements.txt
 cp .env.example .env
 
-2. LLM 側（LM Studio）
+## 2. LLM 側（LM Studio）
 
 LM Studio を起動し Phi-3-mini をロード
 
@@ -171,4 +171,5 @@ app/main.py … ルーター（/health /ingest /search /chat /preview /stats /fi
 デモ用の単純実装です。ファイル更新検知や重複排除は最低限です。
 
 検索の rerank、SSE ストリーミング、認証等は省略しています（必要なら拡張してください）。
+
 
