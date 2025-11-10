@@ -166,7 +166,8 @@ header p {
     animation: rotate 1s linear infinite;
 }
 
-.spinner.hidden {
+/* .hidden クラスが付与された要素を非表示にする（スピナーと送信アイコン両方に使用） */
+.hidden {
     display: none;
 }
 
