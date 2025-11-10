@@ -178,3 +178,31 @@ header p {
         transform: rotate(360deg);
     }
 }
+
+/* プレビュー用の <pre> タグスタイル */
+.bot-message pre {
+    background-color: #f8f9fa; /* 少し薄い背景色 */
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 12px;
+    font-family: monospace;
+    white-space: pre-wrap; /* 長い行を折り返す */
+    word-wrap: break-word;
+    font-size: 13px;
+    max-height: 300px; /* 高すぎないように制限し、スクロール可能にする */
+    overflow-y: auto;
+}
+
+/* 引用元リンクのスタイル調整 */
+.citation-item a {
+    color: #0056b3; /* リンク色 */
+    text-decoration: none;
+    cursor: pointer;
+    display: block; /* クリック領域を広げる */
+    padding: 2px 0;
+}
+
+.citation-item a:hover {
+    text-decoration: underline;
+    background-color: #f8f9fa; /* ホバー時に薄い背景色 */
+}
