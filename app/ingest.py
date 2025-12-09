@@ -117,9 +117,12 @@ def ingest_paths(paths: List[str]) -> Tuple[int, int, int]:
 
         mtime = os.path.getmtime(path)
         digest = file_hash(path)
+        # パスも含めてハッシュ化しないと、別ファイルで同内容の場合にIDが重複する
+        path_digest = hashlib.sha256(path.encode()).hexdigest()[:16]
 
         for i, chunk in enumerate(chunks):
-            batch_ids.append(f"{digest}:{i}")
+            # ID = コンテンツハッシュ_パスハッシュ:チャンク番号
+            batch_ids.append(f"{digest}_{path_digest}:{i}")
             batch_docs.append(chunk)
             batch_metas.append({
                 "path": path,

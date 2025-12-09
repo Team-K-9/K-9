@@ -208,6 +208,7 @@ function App() {
   };
 
   const handleAction = async (action: string) => {
+    console.log('handleAction called with:', action);
     switch (action) {
       case 'open-search': handleOpenFolder(); break;
       case 'create-folder': handleCreateFolder(); break;
