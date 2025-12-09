@@ -119,7 +119,7 @@ function App() {
   };
 
   const handleOpenFolder = async () => {
-    addMessage('user', 'ファイルを検索');
+    addMessage('user', 'フォルダーを開く');
     setIsLoading(true);
     try {
       const response = await fetch(`${API_BASE_URL}/open-folder`, {
