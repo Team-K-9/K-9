@@ -3,8 +3,9 @@ import './index.css';
 import { Message } from './components/Message';
 import { QuickActions } from './components/QuickActions';
 import { InputArea } from './components/InputArea';
+import { FileManagementModal } from './components/FileManagementModal';
 
-const API_BASE_URL = 'http://localhost:8000';
+export const API_BASE_URL = 'http://localhost:8000';
 
 interface Citation {
   path: string;
@@ -27,6 +28,7 @@ function App() {
     }
   ]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -138,21 +140,77 @@ function App() {
   };
 
   const handleCreateFolder = async () => {
-    const folderName = window.prompt('作成するフォルダ名を入力してください:', 'new_folder');
-    if (!folderName) return;
-
-    addMessage('user', `フォルダ作成: ${folderName}`);
-    setIsLoading(true);
     try {
+      // 1. 親フォルダを選択
+      addMessage('bot', 'フォルダを作成する場所を選択してください...');
+      const locRes = await fetch(`${API_BASE_URL}/select-folder`, { method: 'POST' });
+      if (!locRes.ok) throw new Error('場所の選択に失敗しました');
+      const locData = await locRes.json();
+
+      if (locData.status !== 'ok' || !locData.path) {
+        addMessage('bot', '作成をキャンセルしました。');
+        return;
+      }
+      const parentPath = locData.path;
+
+      // 2. フォルダ名を入力
+      const folderName = window.prompt(`「${parentPath}」に作成するフォルダ名を入力してください:`, 'new_folder');
+      if (!folderName) return;
+
+      const separator = parentPath.includes('\\') ? '\\' : '/';
+      const fullPath = `${parentPath}${separator}${folderName}`;
+
+      addMessage('user', `フォルダ作成: ${fullPath}`);
+      setIsLoading(true);
+
       const response = await fetch(`${API_BASE_URL}/create-folder`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path: folderName })
+        body: JSON.stringify({ path: fullPath })
       });
       if (!response.ok) throw new Error('フォルダを作成できませんでした。');
-      addMessage('bot', `フォルダを作成しました: ${folderName}`);
+      addMessage('bot', `フォルダを作成しました: ${fullPath}`);
     } catch (error: any) {
       console.error('フォルダ作成エラー:', error);
+      addMessage('bot', `エラー: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCreateFile = async () => {
+    try {
+      // 1. 親フォルダを選択
+      addMessage('bot', 'ファイルを作成する場所を選択してください...');
+      const locRes = await fetch(`${API_BASE_URL}/select-folder`, { method: 'POST' });
+      if (!locRes.ok) throw new Error('場所の選択に失敗しました');
+      const locData = await locRes.json();
+
+      if (locData.status !== 'ok' || !locData.path) {
+        addMessage('bot', '作成をキャンセルしました。');
+        return;
+      }
+      const parentPath = locData.path;
+
+      // 2. ファイル名を入力
+      const fileName = window.prompt(`「${parentPath}」に作成するファイル名を入力してください:`, 'new_file.txt');
+      if (!fileName) return;
+
+      const separator = parentPath.includes('\\') ? '\\' : '/';
+      const fullPath = `${parentPath}${separator}${fileName}`;
+
+      addMessage('user', `ファイル作成: ${fullPath}`);
+      setIsLoading(true);
+
+      const response = await fetch(`${API_BASE_URL}/create-file`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: fullPath })
+      });
+      if (!response.ok) throw new Error('ファイルを作成できませんでした。');
+      addMessage('bot', `ファイルを作成しました: ${fullPath}`);
+    } catch (error: any) {
+      console.error('ファイル作成エラー:', error);
       addMessage('bot', `エラー: ${error.message}`);
     } finally {
       setIsLoading(false);
@@ -207,14 +265,31 @@ function App() {
     addMessage('bot', helpText);
   };
 
+  const handleReset = async () => {
+    if (!window.confirm('本当に記憶をリセットしますか？\n取り込んだドキュメントの情報がすべて消去されます。')) return;
+    addMessage('user', '記憶をリセット');
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/reset`, { method: 'POST' });
+      if (!res.ok) throw new Error('リセットに失敗しました');
+      addMessage('bot', '記憶をリセットしました。ドキュメントはすべて消去されました。');
+      setIsManageModalOpen(false);
+    } catch (error: any) {
+      console.error('リセットエラー:', error);
+      addMessage('bot', `エラー: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleAction = async (action: string) => {
     console.log('handleAction called with:', action);
     switch (action) {
       case 'open-search': handleOpenFolder(); break;
       case 'create-folder': handleCreateFolder(); break;
+      case 'create-file': handleCreateFile(); break;
       case 'recent-files': handleRecentFiles(); break;
       case 'ingest': {
-        // バックエンド側でダイアログを開く
         try {
           setIsLoading(true);
           const res = await fetch(`${API_BASE_URL}/select-folder`, { method: 'POST' });
@@ -226,7 +301,6 @@ function App() {
             addMessage('user', `ドキュメント取り込み: ${path}`);
             await handleIngest([path]);
           } else {
-            // キャンセルされた場合
             console.log('フォルダ選択がキャンセルされました');
           }
         } catch (error: any) {
@@ -241,6 +315,10 @@ function App() {
         addMessage('user', '統計情報');
         setIsLoading(true);
         handleStats().finally(() => setIsLoading(false));
+        break;
+      }
+      case 'manage-memory': {
+        setIsManageModalOpen(true);
         break;
       }
       case 'help': handleHelp(); break;
@@ -293,11 +371,16 @@ function App() {
               {index === 0 && <QuickActions onAction={handleAction} />}
             </div>
           ))}
-          {/* 最初のメッセージの後以外にもQuickActionsを表示したい場合はここにロジックを追加 */}
         </div>
       </div>
 
       <InputArea onSend={handleSendQuery} isLoading={isLoading} />
+
+      <FileManagementModal
+        isOpen={isManageModalOpen}
+        onClose={() => setIsManageModalOpen(false)}
+        onReset={handleReset}
+      />
     </div>
   );
 }

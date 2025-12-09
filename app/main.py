@@ -158,6 +158,22 @@ def create_folder(req: FolderRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/create-file")
+def create_file(req: FolderRequest):
+    """指定パスに空ファイルを作成する"""
+    try:
+        # ディレクトリが存在しない場合はエラーにするか、作るか。
+        # ここでは親ディレクトリは既存と仮定（GUIで選ぶので）
+        parent = os.path.dirname(req.path)
+        if parent and not os.path.exists(parent):
+            os.makedirs(parent, exist_ok=True)
+            
+        with open(req.path, 'w') as f:
+            pass # 空ファイル作成
+        return {"status": "ok", "path": req.path}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/recent-files")
 def recent_files(limit: int = 5):
     """最近変更されたファイルを返す"""
@@ -226,4 +242,94 @@ finally:
         return {"status": "ok", "path": path}
     except Exception as e:
         print(f"DEBUG: Dialog Error={e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/reset")
+def reset_database():
+    """データベース（記憶）をリセットする"""
+    try:
+        col = get_collection()
+        count = col.count()
+        if count > 0:
+            all_data = col.get()
+            if all_data['ids']:
+                col.delete(ids=all_data['ids'])
+        return {"status": "ok", "deleted_count": count}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/ingested-files")
+def list_ingested_files():
+    """取り込み済みファイルの一覧を返す"""
+    try:
+        col = get_collection()
+        # 全データのメタデータを取得
+        # データ量が多い場合はページネーションが必要だが、デモ用なので全件取得
+        data = col.get(include=["metadatas"])
+        metadatas = data.get("metadatas", [])
+        
+        # パスごとにユニークにする
+        unique_files = {}
+        for meta in metadatas:
+            path = meta.get("path")
+            if path:
+                if path not in unique_files:
+                    unique_files[path] = {
+                        "path": path,
+                        "mtime": meta.get("mtime", 0),
+                        "chunk_count": 0
+                    }
+                unique_files[path]["chunk_count"] += 1
+        
+        # リスト化してソート
+        file_list = list(unique_files.values())
+        file_list.sort(key=lambda x: x["path"])
+        
+        return {"files": file_list}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+class DeleteFileRequest(BaseModel):
+    path: str
+
+@app.post("/delete-file")
+def delete_file(req: DeleteFileRequest):
+    """指定されたパスのドキュメントを削除する"""
+    try:
+        col = get_collection()
+        col.delete(where={"path": req.path})
+        return {"status": "ok", "path": req.path}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/list-directory")
+def list_directory(req: FolderRequest):
+    """指定パスのディレクトリ内容を返す"""
+    try:
+        path = os.path.abspath(req.path)
+        if not os.path.exists(path):
+            # パスが存在しない場合はカレントディレクトリを返す
+            path = os.getcwd()
+            
+        items = []
+        try:
+            with os.scandir(path) as it:
+                for entry in it:
+                    items.append({
+                        "name": entry.name,
+                        "type": "dir" if entry.is_dir() else "file",
+                        "path": entry.path
+                    })
+        except OSError:
+            pass
+            
+        # ディレクトリ優先、名前順でソート
+        items.sort(key=lambda x: (0 if x["type"] == "dir" else 1, x["name"]))
+        
+        return {
+            "path": path,
+            "parent": os.path.dirname(path),
+            "items": items
+        }
+    except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
