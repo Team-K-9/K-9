@@ -113,3 +113,68 @@ def stats():
         embed_model=settings.embed_model,
         llm_model=settings.llm_model,
     )
+
+from pydantic import BaseModel
+import subprocess
+import sys
+import os
+import platform
+
+class FolderRequest(BaseModel):
+    path: str
+
+@app.post("/open-folder")
+def open_folder(req: FolderRequest):
+    """OSのファイルエクスプローラーで指定パスを開く"""
+    path = os.path.abspath(req.path)
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="Path not found")
+
+    try:
+        if platform.system() == "Windows":
+            os.startfile(path)
+        elif platform.system() == "Darwin":  # macOS
+            subprocess.run(["open", path], check=True)
+        else:  # Linux
+            subprocess.run(["xdg-open", path], check=True)
+        return {"status": "ok", "path": path}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/create-folder")
+def create_folder(req: FolderRequest):
+    """指定パスにフォルダを作成する"""
+    try:
+        os.makedirs(req.path, exist_ok=True)
+        return {"status": "ok", "path": req.path}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/recent-files")
+def recent_files(limit: int = 5):
+    """最近変更されたファイルを返す"""
+    try:
+        files = []
+        # カレントディレクトリ以下のファイルを走査（隠しファイル除外）
+        for root, dirs, filenames in os.walk("."):
+            dirs[:] = [d for d in dirs if not d.startswith(".")]
+            for filename in filenames:
+                if filename.startswith("."):
+                    continue
+                filepath = os.path.join(root, filename)
+                try:
+                    mtime = os.path.getmtime(filepath)
+                    files.append({
+                        "name": filename,
+                        "path": filepath,
+                        "mtime": mtime,
+                        "mtime_str": str(mtime) # 簡易的な文字列表現
+                    })
+                except OSError:
+                    continue
+        
+        # 更新日時で降順ソート
+        files.sort(key=lambda x: x["mtime"], reverse=True)
+        return {"files": files[:limit]}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
