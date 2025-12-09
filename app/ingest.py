@@ -104,35 +104,41 @@ def ingest_paths(paths: List[str]) -> Tuple[int, int, int]:
     def process_single_file(path):
         nonlocal processed_files, processed_chunks, skipped
         try:
-            text = load_text_from_file(path)
-        except Exception:
-            return
+            try:
+                text = load_text_from_file(path)
+            except Exception:
+                skipped += 1
+                return
 
-        # 既存削除
-        _delete_by_path(path)
+            # 既存削除
+            _delete_by_path(path)
 
-        chunks = chunk_text(text, settings.max_chars_per_chunk, settings.chunk_overlap_chars)
-        if not chunks:
-            return
+            chunks = chunk_text(text, settings.max_chars_per_chunk, settings.chunk_overlap_chars)
+            if not chunks:
+                skipped += 1
+                return
 
-        mtime = os.path.getmtime(path)
-        digest = file_hash(path)
-        # パスも含めてハッシュ化しないと、別ファイルで同内容の場合にIDが重複する
-        path_digest = hashlib.sha256(path.encode()).hexdigest()[:16]
+            mtime = os.path.getmtime(path)
+            digest = file_hash(path)
+            # パスも含めてハッシュ化しないと、別ファイルで同内容の場合にIDが重複する
+            path_digest = hashlib.sha256(path.encode()).hexdigest()[:16]
 
-        for i, chunk in enumerate(chunks):
-            # ID = コンテンツハッシュ_パスハッシュ:チャンク番号
-            batch_ids.append(f"{digest}_{path_digest}:{i}")
-            batch_docs.append(chunk)
-            batch_metas.append({
-                "path": path,
-                "mtime": mtime,
-                "chunk_index": i,
-                "digest": digest,
-            })
-        
-        processed_files += 1
-        processed_chunks += len(chunks)
+            for i, chunk in enumerate(chunks):
+                # ID = コンテンツハッシュ_パスハッシュ:チャンク番号
+                batch_ids.append(f"{digest}_{path_digest}:{i}")
+                batch_docs.append(chunk)
+                batch_metas.append({
+                    "path": path,
+                    "mtime": mtime,
+                    "chunk_index": i,
+                    "digest": digest,
+                })
+            
+            processed_files += 1
+            processed_chunks += len(chunks)
+        except Exception as e:
+            print(f"Error processing file {path}: {e}")
+            skipped += 1
 
     for p in paths:
         if os.path.isdir(p):

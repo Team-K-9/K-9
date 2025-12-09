@@ -9,22 +9,35 @@ interface Citation {
 
 interface MessageProps {
     sender: 'user' | 'bot';
-    content: string;
+    content?: string;
     citations?: Citation[];
-    onPreview: (path: string) => void;
+    onPreview?: (path: string) => void;
+    isLoading?: boolean;
 }
 
-export const Message: React.FC<MessageProps> = ({ sender, content, citations, onPreview }) => {
+export const Message: React.FC<MessageProps> = ({ sender, content, citations, onPreview, isLoading }) => {
     // HTMLエスケープはReactが自動で行うが、<br>や<pre>の扱いに注意が必要
     // ここでは簡易的に、改行を<br>に変換する処理を入れる（preタグ内以外）
     // ただし、contentに既にHTMLタグが含まれている場合（プレビューなど）はdangerouslySetInnerHTMLを使う必要がある
 
-    const isPreview = content.includes('<pre>');
+    if (isLoading) {
+        return (
+            <div className={`chat-message ${sender}-message`}>
+                <div className="typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        );
+    }
+
+    const isPreview = content?.includes('<pre>');
 
     return (
         <div className={`chat-message ${sender}-message`}>
             {isPreview ? (
-                <div dangerouslySetInnerHTML={{ __html: content }} />
+                <div dangerouslySetInnerHTML={{ __html: content || '' }} />
             ) : (
                 <p style={{ whiteSpace: 'pre-wrap' }}>{content}</p>
             )}
@@ -40,7 +53,7 @@ export const Message: React.FC<MessageProps> = ({ sender, content, citations, on
                                     href="#"
                                     onClick={(e) => {
                                         e.preventDefault();
-                                        onPreview(citation.path);
+                                        onPreview?.(citation.path);
                                     }}
                                     title={`クリックして ${citation.path} をプレビュー`}
                                 >
