@@ -126,19 +126,27 @@ class FolderRequest(BaseModel):
 @app.post("/open-folder")
 def open_folder(req: FolderRequest):
     """OSのファイルエクスプローラーで指定パスを開く"""
+    print(f"DEBUG: open_folder called with path={req.path}")
     path = os.path.abspath(req.path)
+    print(f"DEBUG: resolved path={path}")
+    
     if not os.path.exists(path):
+        print("DEBUG: Path not found")
         raise HTTPException(status_code=404, detail="Path not found")
 
     try:
-        if platform.system() == "Windows":
+        sys_platform = platform.system()
+        print(f"DEBUG: Platform={sys_platform}")
+        
+        if sys_platform == "Windows":
             os.startfile(path)
-        elif platform.system() == "Darwin":  # macOS
+        elif sys_platform == "Darwin":  # macOS
             subprocess.run(["open", path], check=True)
         else:  # Linux
             subprocess.run(["xdg-open", path], check=True)
         return {"status": "ok", "path": path}
     except Exception as e:
+        print(f"DEBUG: Error={e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/create-folder")
@@ -177,4 +185,45 @@ def recent_files(limit: int = 5):
         files.sort(key=lambda x: x["mtime"], reverse=True)
         return {"files": files[:limit]}
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/select-folder")
+def select_folder():
+    """バックエンド側でフォルダ選択ダイアログを開く"""
+    try:
+        # macOSなどでメインスレッド以外からのGUI呼び出しがクラッシュするのを防ぐため、
+        # 別プロセスとして python を起動してダイアログを出す
+        script = """
+import tkinter as tk
+from tkinter import filedialog
+import sys
+
+root = tk.Tk()
+root.withdraw()
+root.attributes('-topmost', True)
+try:
+    path = filedialog.askdirectory()
+    if path:
+        print(path, end='')
+except:
+    pass
+finally:
+    root.destroy()
+"""
+        # 現在のPythonインタプリタを使ってスクリプトを実行
+        result = subprocess.run(
+            [sys.executable, "-c", script],
+            capture_output=True,
+            text=True,
+            check=False
+        )
+        
+        path = result.stdout.strip()
+        
+        if not path:
+            return {"status": "cancelled", "path": None}
+            
+        return {"status": "ok", "path": path}
+    except Exception as e:
+        print(f"DEBUG: Dialog Error={e}")
         raise HTTPException(status_code=500, detail=str(e))

@@ -169,7 +169,7 @@ function App() {
       if (data.files && data.files.length > 0) {
         let content = '最近変更されたファイル:\n';
         data.files.forEach((f: any) => {
-          content += `・${f.name} (${f.mtime_str})\n`;
+          content += `・${f.name}\n   ${f.path}\n   (${f.mtime_str})\n`;
         });
         addMessage('bot', content);
       } else {
@@ -207,11 +207,41 @@ function App() {
     addMessage('bot', helpText);
   };
 
-  const handleAction = (action: string) => {
+  const handleAction = async (action: string) => {
     switch (action) {
       case 'open-search': handleOpenFolder(); break;
       case 'create-folder': handleCreateFolder(); break;
       case 'recent-files': handleRecentFiles(); break;
+      case 'ingest': {
+        // バックエンド側でダイアログを開く
+        try {
+          setIsLoading(true);
+          const res = await fetch(`${API_BASE_URL}/select-folder`, { method: 'POST' });
+          if (!res.ok) throw new Error('フォルダ選択に失敗しました');
+          const data = await res.json();
+
+          if (data.status === 'ok' && data.path) {
+            const path = data.path;
+            addMessage('user', `ドキュメント取り込み: ${path}`);
+            await handleIngest([path]);
+          } else {
+            // キャンセルされた場合
+            console.log('フォルダ選択がキャンセルされました');
+          }
+        } catch (error: any) {
+          console.error('フォルダ選択エラー:', error);
+          addMessage('bot', `エラー: ${error.message}`);
+        } finally {
+          setIsLoading(false);
+        }
+        break;
+      }
+      case 'stats': {
+        addMessage('user', '統計情報');
+        setIsLoading(true);
+        handleStats().finally(() => setIsLoading(false));
+        break;
+      }
       case 'help': handleHelp(); break;
     }
   };

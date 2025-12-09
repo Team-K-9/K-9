@@ -93,6 +93,43 @@ def ingest_paths(paths: List[str]) -> Tuple[int, int, int]:
     skipped = 0
 
     col = get_collection()
+    
+    # バッチ処理用のリスト
+    batch_ids = []
+    batch_docs = []
+    batch_metas = []
+    
+    # 削除対象のパス（まとめて削除はできないが、ループ内で処理）
+    
+    def process_single_file(path):
+        nonlocal processed_files, processed_chunks, skipped
+        try:
+            text = load_text_from_file(path)
+        except Exception:
+            return
+
+        # 既存削除
+        _delete_by_path(path)
+
+        chunks = chunk_text(text, settings.max_chars_per_chunk, settings.chunk_overlap_chars)
+        if not chunks:
+            return
+
+        mtime = os.path.getmtime(path)
+        digest = file_hash(path)
+
+        for i, chunk in enumerate(chunks):
+            batch_ids.append(f"{digest}:{i}")
+            batch_docs.append(chunk)
+            batch_metas.append({
+                "path": path,
+                "mtime": mtime,
+                "chunk_index": i,
+                "digest": digest,
+            })
+        
+        processed_files += 1
+        processed_chunks += len(chunks)
 
     for p in paths:
         if os.path.isdir(p):
@@ -102,18 +139,29 @@ def ingest_paths(paths: List[str]) -> Tuple[int, int, int]:
                     ext = os.path.splitext(full)[1].lower()
                     if ext not in SUPPORTED_EXTS:
                         continue
-                    pf, pc = _ingest_file(col, full)
-                    processed_files += pf
-                    processed_chunks += pc
+                    process_single_file(full)
         elif os.path.isfile(p):
             ext = os.path.splitext(p)[1].lower()
             if ext in SUPPORTED_EXTS:
-                pf, pc = _ingest_file(col, p)
-                processed_files += pf
-                processed_chunks += pc
+                process_single_file(p)
             else:
                 skipped += 1
         else:
             skipped += 1
+
+    # まとめてDBに追加（埋め込み計算のオーバーヘッドを減らす）
+    if batch_ids:
+        # Chromaの制限（一度に多すぎるとエラーになる場合がある）を考慮して
+        # 必要ならさらに分割するが、まずは一括で試す
+        # (数千件程度なら問題ないはず)
+        BATCH_SIZE = 100 # 念のため小分けにする
+        total = len(batch_ids)
+        for i in range(0, total, BATCH_SIZE):
+            end = min(i + BATCH_SIZE, total)
+            col.add(
+                ids=batch_ids[i:end],
+                documents=batch_docs[i:end],
+                metadatas=batch_metas[i:end]
+            )
 
     return processed_files, processed_chunks, skipped

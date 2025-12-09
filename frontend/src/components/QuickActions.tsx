@@ -10,6 +10,8 @@ export const QuickActions: React.FC<QuickActionsProps> = ({ onAction }) => {
             <button className="action-button" onClick={() => onAction('open-search')}>フォルダーを開く</button>
             <button className="action-button" onClick={() => onAction('create-folder')}>フォルダを作成</button>
             <button className="action-button" onClick={() => onAction('recent-files')}>最近のファイルを表示</button>
+            <button className="action-button" onClick={() => onAction('ingest')}>ドキュメント取り込み</button>
+            <button className="action-button" onClick={() => onAction('stats')}>統計情報</button>
             <button className="action-button" onClick={() => onAction('help')}>ヘルプを表示</button>
         </div>
     );
