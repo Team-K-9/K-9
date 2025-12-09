@@ -113,3 +113,100 @@ def stats():
         embed_model=settings.embed_model,
         llm_model=settings.llm_model,
     )
+
+@app.post("/open-folder")
+def open_folder(path: str = "."):
+    """
+    指定されたパスをOSのファイルエクスプローラーで開く。
+    デフォルトはカレントディレクトリ。
+    """
+    import subprocess
+    import sys
+    import os
+
+    # 絶対パスに変換
+    abs_path = os.path.abspath(path)
+    
+    if not os.path.exists(abs_path):
+        raise HTTPException(status_code=404, detail="Path not found")
+
+    try:
+        if sys.platform == "darwin":  # macOS
+            subprocess.run(["open", abs_path], check=True)
+        elif sys.platform == "win32":  # Windows
+            subprocess.run(["explorer", abs_path], check=True)
+        else:  # Linux (xdg-open)
+            subprocess.run(["xdg-open", abs_path], check=True)
+        return {"status": "ok", "message": f"Opened {abs_path}"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/create-folder")
+def create_folder(req: dict):
+    """
+    指定されたパスにフォルダを作成する。
+    """
+    import os
+    
+    path = req.get("path")
+    if not path:
+        raise HTTPException(status_code=400, detail="Path is required")
+
+    # 絶対パスに変換 (セキュリティ上の理由から、本来は特定のルート以下に制限すべきだが、デモなので簡易実装)
+    abs_path = os.path.abspath(path)
+
+    try:
+        os.makedirs(abs_path, exist_ok=True)
+        return {"status": "ok", "message": f"Created folder: {abs_path}"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/recent-files")
+def recent_files(limit: int = 5):
+    """
+    最近変更されたファイルを取得する。
+    """
+    import os
+    from datetime import datetime
+
+    files_list = []
+    root_dir = "."  # カレントディレクトリから探索
+
+    try:
+        for root, dirs, files in os.walk(root_dir):
+            # .git や .venv などを除外
+            if ".git" in dirs: dirs.remove(".git")
+            if ".venv" in dirs: dirs.remove(".venv")
+            if "__pycache__" in dirs: dirs.remove("__pycache__")
+
+            for file in files:
+                if file == ".DS_Store": continue
+                
+                full_path = os.path.join(root, file)
+                try:
+                    mtime = os.path.getmtime(full_path)
+                    files_list.append({
+                        "path": full_path,
+                        "mtime": mtime,
+                        "name": file
+                    })
+                except OSError:
+                    continue
+        
+        # 更新日時で降順ソート
+        files_list.sort(key=lambda x: x["mtime"], reverse=True)
+        
+        # 上位 limit 件を返す
+        result = []
+        for f in files_list[:limit]:
+            dt = datetime.fromtimestamp(f["mtime"])
+            result.append({
+                "path": f["path"],
+                "mtime_str": dt.strftime("%Y-%m-%d %H:%M:%S"),
+                "name": f["name"]
+            })
+            
+        return {"files": result}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
